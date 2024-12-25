@@ -1,8 +1,8 @@
-import { Plus, Minus, Brain } from 'lucide-react';
+import { Plus, Minus, Brain, EthernetPortIcon } from 'lucide-react';
 import { useState } from 'react';
 
 
-export function NetworkForm({ layers, onLayersChange, onGenerateNetwork ,  isDatasetSelected , onTrainNetwork}) {
+export function NetworkForm({ layers, onLayersChange, onGenerateNetwork ,  isDatasetSelected , onTrainNetwork , onEpochsLrChange , epochsLr}) {
 
   const [isNetworkGenerated , setIsNetworkGenerated] = useState(false); 
   // const [isDatasetSelected , setIsDatasetSelected] = useState(false);
@@ -39,6 +39,14 @@ export function NetworkForm({ layers, onLayersChange, onGenerateNetwork ,  isDat
   const handleTrainNetwork = () => {
     onTrainNetwork();
   }
+
+  const updateEpochsLr = (e) => {
+    const {name , value} = e.target;
+    onEpochsLrChange((prevEpochsLr) => ({
+      ...prevEpochsLr,
+      [name]:value
+    }));
+  };
 
   return (<>
 
@@ -80,31 +88,70 @@ export function NetworkForm({ layers, onLayersChange, onGenerateNetwork ,  isDat
           onClick={addLayer}
           className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 
           ${isDatasetSelected ? 'bg-indigo-100 hover:bg-indigo-200' : 'bg-gray-400 cursor-not-allowed' }`}
+          disabled={!isDatasetSelected}
         >
           <Plus className="w-4 h-4 mr-2" />
           Add Hidden Layer
         </button>
         <button
           onClick={handleGenerateNetwork}
+          disabled={!isDatasetSelected}
           className= {` inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white
             ${ isDatasetSelected ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-gray-400 cursor-not-allowed' } `}
         >
           <Brain className="w-4 h-4 mr-2" />
           Generate Network
         </button>
-        <button
+      </div>
+
+      <div className="space-y-4">
+      <div className="flex items-center gap-4 mt-6">
+            <span className="w-24 text-sm font-medium text-gray-700">
+              Epochs
+            </span>
+            <input
+              type="number"
+              min="1"
+              name="epochs"
+              value={epochsLr.epochs}
+              onChange={updateEpochsLr}
+              className="block w-24 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            />
+
+        </div>
+        <div className="flex items-center gap-4 mt-6">
+            <span className="w-24 text-sm font-medium text-gray-700">
+              Learning Rate
+            </span>
+            <input
+              type="number"
+              min="1"
+              name='lr'
+              value={epochsLr.lr}
+              onChange={updateEpochsLr}
+              className="block w-24 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            />
+
+        </div>
+        
+            
+
+
+      <div className="mt-6 flex gap-4">
+
+      <button
             onClick={handleTrainNetwork}
             disabled={!isNetworkGenerated}
             className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white ${
               isNetworkGenerated ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-400 cursor-not-allowed'
             }`}
-          >
+            >
             <Brain className="w-4 h-4 mr-2" />
             Train Network
           </button>
-
-      </div>
+          </div>
     </div>
+            </div>
   </>
   );
 }
