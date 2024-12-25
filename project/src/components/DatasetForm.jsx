@@ -33,7 +33,7 @@ export default function DatasetForm({ onLayerChange, onDatasetChange, isDatasetS
                 ? "bg-gray-400"
                 : "bg-indigo-600 hover:bg-indigo-700"
             } text-white`}
-            disabled={selectedDataset !== null && selectedDataset !== dataset.name}
+            // disabled={selectedDataset !== null && selectedDataset !== dataset.name}
             onClick={() => selectDataset(dataset)}
           >
             {dataset.name.charAt(0).toUpperCase() + dataset.name.slice(1)}
