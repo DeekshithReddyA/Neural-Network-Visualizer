@@ -22,8 +22,8 @@ export default function DatasetForm({ onLayerChange, onDatasetChange, isDatasetS
       <div className="mt-6 flex gap-4">
         {[
           { name: "spiral", inputLayer: 2, outputLayer: 3 },
-          { name: "iris", inputLayer: 4, outputLayer: 1 },
-          { name: "xor", inputLayer: 2, outputLayer: 1 },
+          // { name: "iris", inputLayer: 4, outputLayer: 1 },
+          // { name: "xor", inputLayer: 2, outputLayer: 1 },
           { name: "sine", inputLayer: 1, outputLayer: 1 },
         ].map((dataset) => (
           <button
