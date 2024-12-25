@@ -17,7 +17,7 @@ function LossHistory({lossResponse}) {
           <h2 className="text-2xl font-bold text-gray-800">Loss History</h2>
         </div>
   
-        <div className="mt-6 gap-4 max-h-[205px] overflow-y-auto">
+        <div className="mt-6 gap-4 max-h-[420px] overflow-y-auto">
           {/* This div will make the loss history scrollable when the content exceeds the height */}
           {lossHistory.map((obj, ind) => (
             <p key={ind} className="text-gray-600">

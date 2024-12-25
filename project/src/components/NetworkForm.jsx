@@ -2,16 +2,17 @@ import { Plus, Minus, Brain, EthernetPortIcon } from 'lucide-react';
 import { useState } from 'react';
 
 
-export function NetworkForm({ layers, onLayersChange, onGenerateNetwork ,  isDatasetSelected , onTrainNetwork , onEpochsLrChange , epochsLr}) {
+export function NetworkForm({ layers, onLayersChange, onGenerateNetwork, isDatasetSelected, onTrainNetwork, onEpochsLrChange, epochsLr }) {
 
-  const [isNetworkGenerated , setIsNetworkGenerated] = useState(false); 
+  const [isNetworkGenerated, setIsNetworkGenerated] = useState(false);
   // const [isDatasetSelected , setIsDatasetSelected] = useState(false);
+  const [isTraining, setIsTraining] = useState(false);
 
   const addLayer = () => {
     const outputLayer = layers[layers.length - 1];
 
     onLayersChange([
-      ...layers.slice(0 , -1),
+      ...layers.slice(0, -1),
       { id: crypto.randomUUID(), neurons: 1 },
       outputLayer
     ]);
@@ -36,19 +37,30 @@ export function NetworkForm({ layers, onLayersChange, onGenerateNetwork ,  isDat
     setIsNetworkGenerated(true);
   }
 
-  const handleTrainNetwork = () => {
-    onTrainNetwork();
-  }
+  // const handleTrainNetwork = () => {
+  //   onTrainNetwork();
+  // }
+  const handleTrainNetwork = async () => {
+    setIsTraining(true); // Start showing the animation
+    try {
+      await onTrainNetwork(); // Assume `onTrainNetwork` returns a promise
+    } catch (error) {
+      console.error("Training failed:", error);
+    } finally {
+      setIsTraining(false); // Stop showing the animation
+    }
+  };
 
   const updateEpochsLr = (e) => {
-    const {name , value} = e.target;
+    const { name, value } = e.target;
     onEpochsLrChange((prevEpochsLr) => ({
       ...prevEpochsLr,
-      [name]:value
+      [name]: value
     }));
   };
 
   return (<>
+
 
     <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl">
       <div className="flex items-center gap-2 mb-6">
@@ -87,7 +99,7 @@ export function NetworkForm({ layers, onLayersChange, onGenerateNetwork ,  isDat
         <button
           onClick={addLayer}
           className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 
-          ${isDatasetSelected ? 'bg-indigo-100 hover:bg-indigo-200' : 'bg-gray-400 cursor-not-allowed' }`}
+          ${isDatasetSelected ? 'bg-indigo-100 hover:bg-indigo-200' : 'bg-gray-400 cursor-not-allowed'}`}
           disabled={!isDatasetSelected}
         >
           <Plus className="w-4 h-4 mr-2" />
@@ -96,8 +108,8 @@ export function NetworkForm({ layers, onLayersChange, onGenerateNetwork ,  isDat
         <button
           onClick={handleGenerateNetwork}
           disabled={!isDatasetSelected}
-          className= {` inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white
-            ${ isDatasetSelected ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-gray-400 cursor-not-allowed' } `}
+          className={` inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white
+            ${isDatasetSelected ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-gray-400 cursor-not-allowed'} `}
         >
           <Brain className="w-4 h-4 mr-2" />
           Generate Network
@@ -105,53 +117,62 @@ export function NetworkForm({ layers, onLayersChange, onGenerateNetwork ,  isDat
       </div>
 
       <div className="space-y-4">
-      <div className="flex items-center gap-4 mt-6">
-            <span className="w-24 text-sm font-medium text-gray-700">
-              Epochs
-            </span>
-            <input
-              type="number"
-              min="1"
-              name="epochs"
-              value={epochsLr.epochs}
-              onChange={updateEpochsLr}
-              className="block w-24 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-            />
+        <div className="flex items-center gap-4 mt-6">
+          <span className="w-24 text-sm font-medium text-gray-700">
+            Epochs
+          </span>
+          <input
+            type="number"
+            min="1"
+            name="epochs"
+            value={epochsLr.epochs}
+            onChange={updateEpochsLr}
+            className="block w-24 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+          />
 
         </div>
         <div className="flex items-center gap-4 mt-6">
-            <span className="w-24 text-sm font-medium text-gray-700">
-              Learning Rate
-            </span>
-            <input
-              type="number"
-              min="1"
-              name='lr'
-              value={epochsLr.lr}
-              onChange={updateEpochsLr}
-              className="block w-24 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-            />
+          <span className="w-24 text-sm font-medium text-gray-700">
+            Learning Rate
+          </span>
+          <input
+            type="number"
+            min="1"
+            name='lr'
+            value={epochsLr.lr}
+            onChange={updateEpochsLr}
+            className="block w-24 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+          />
 
         </div>
-        
-            
+        <div className="mt-6 flex gap-4">
 
-
-      <div className="mt-6 flex gap-4">
-
-      <button
+          <button
             onClick={handleTrainNetwork}
-            disabled={!isNetworkGenerated}
-            className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white ${
-              isNetworkGenerated ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-400 cursor-not-allowed'
-            }`}
-            >
-            <Brain className="w-4 h-4 mr-2" />
-            Train Network
+            disabled={!isNetworkGenerated || isTraining}
+            className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white ${isTraining
+              ? 'bg-blue-500 cursor-wait'
+              : isNetworkGenerated
+                ? 'bg-green-600 hover:bg-green-700'
+                : 'bg-gray-400 cursor-not-allowed'
+              }`}
+          >
+            {isTraining ? (
+              <>  <div className="flex items-center gap-4">
+                <span className="animate-pulse">Training...</span>
+                <div className="w-5 h-5 border-2 border-white-500 border-t-transparent rounded-full animate-spin"></div>
+              </div>
+              </>
+            ) : (
+              <>
+                <Brain className="w-4 h-4 mr-2" />
+                Train Network
+              </>
+            )}
           </button>
-          </div>
+        </div>
+      </div>
     </div>
-            </div>
   </>
   );
 }
