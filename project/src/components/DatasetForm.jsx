@@ -24,7 +24,7 @@ export default function DatasetForm({ onLayerChange, onDatasetChange, isDatasetS
           { name: "spiral", inputLayer: 2, outputLayer: 3 },
           { name: "iris", inputLayer: 4, outputLayer: 1 },
           { name: "xor", inputLayer: 2, outputLayer: 1 },
-          { name: "sin", inputLayer: 1, outputLayer: 1 },
+          { name: "sine", inputLayer: 1, outputLayer: 1 },
         ].map((dataset) => (
           <button
             key={dataset.name}

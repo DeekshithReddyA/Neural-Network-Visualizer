@@ -9,12 +9,17 @@ CORS(app)
 def train():
     # Get the JSON data from the request
     data = request.get_json()
+    print(data)
 
     # Extract dataset information
     dataset = data.get('dataset', {})
     dataset_name = dataset.get('name')
     input_layer = dataset.get('inputLayer')
     output_layer = dataset.get('outputLayer')
+
+    epochsLr = data.get('epochsLr')
+    epochs = int(epochsLr.get('epochs'))
+    learning_rate = float(epochsLr.get('lr'))
 
     # Extract layers information
     layers = data.get('layers', [])
@@ -27,15 +32,18 @@ def train():
     print(f"Output Layer Neurons: {output_layer}")
     print(f"Number of Layers: {num_layers}")
     print(f"Neurons per Layer: {neurons_per_layer}")
+    print(f"Epochs: {epochs}")
+    print(f"Learning Rate: {learning_rate}")
 
 
-    loss = build_and_train_model(dataset_name , neurons_per_layer)
+    metric_name , loss = build_and_train_model(dataset_name , neurons_per_layer , epochs , learning_rate)
 
     # Send a response back to the frontend
     response = {
         "dataset_name": dataset_name,
         "num_layers": num_layers,
         "neurons_per_layer": neurons_per_layer,
+        "metric_name" : metric_name,
         "loss" : loss
     }
     return jsonify(response)

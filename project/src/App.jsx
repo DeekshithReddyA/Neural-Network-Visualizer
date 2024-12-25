@@ -15,7 +15,8 @@ function App() {
   const [layers, setLayers] = useState([]);
   const [networkConfig, setNetworkConfig] = useState({ layers });
   const [data, setData] = useState({ dataset, activation, layers });
-  const [lossResponse, setLossResponse] = useState("");
+  const [lossResponse, setLossResponse] = useState({metric_name : '' , loss : ''});
+  const [epochsLr, setEpochsLr] = useState({epochs : 100 , lr : 0.001});
 
   const visulizationRef = useRef(null);
 
@@ -24,15 +25,21 @@ function App() {
     if (visulizationRef.current) {
       visulizationRef.current.scrollIntoView({ behavior: "smooth" });
     }
-    setData({ dataset, activation, layers });
+    setData({ dataset, activation, layers , epochsLr });  
     console.log(data)
   };
 
   const handleTrainNetwork = async () => {
-    setData({ dataset, activation, layers });
-    const response = await axios.post('http://localhost:5000/train', data);
-    setLossResponse(response.data.loss);
-    console.log(response.data.loss);
+    const updatedData = {
+      dataset,
+      activation,
+      layers,
+      epochsLr,
+    };
+    setData(updatedData);
+    const response = await axios.post('http://localhost:5000/train', updatedData);
+    setLossResponse({metric_name : response.data.metric_name , loss: response.data.loss});
+    console.log(response.data);
   };
 
   return (
@@ -47,14 +54,14 @@ function App() {
                 isDatasetSelected={setIsDatasetSelected}
               />
             </div>
-            <div className="w-1/2 gap-8 py-4">
+            {/* <div className="w-1/2 gap-8 py-4">
               <Activation
                 onActChange={setActivation} 
                 isActSelected={isActSelected}
                 setIsActSelected={setIsActSelected}
                 isDatasetSelected={isDatasetSelected}
               />
-            </div>
+            </div> */}
           </div>
           <div className="flex gap-4 py-2">
             <div className="w-1/2">
@@ -65,14 +72,13 @@ function App() {
                 onGenerateNetwork={handleGenerateNetwork}
                 onDatasetChange={setDataset}
                 isDatasetSelected={isDatasetSelected}
+                onEpochsLrChange={setEpochsLr}
+                epochsLr={epochsLr}
                 onTrainNetwork={handleTrainNetwork}
               />
             </div>
 
-            <div className="w-1/3 h-[400px] overflow-y-auto">
-              {/* LossHistory takes 1/3 of the width */}
-              <LossHistory lossResponse={lossResponse} />
-            </div>
+
           </div>
 
           <div
@@ -82,7 +88,14 @@ function App() {
           >
             <NetworkVisualization config={networkConfig} />
           </div>
+
+          <div className="py-4 w-1/3 h-[400px] overflow-y-auto">
+              {/* LossHistory takes 1/3 of the width */}
+              <LossHistory lossResponse={lossResponse} />
+            </div>
+          
         </div>
+
       </div>
     </>
   );

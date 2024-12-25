@@ -1,6 +1,7 @@
 
 import numpy as np
 from nnfs.datasets import spiral_data
+from dataset import select_dataset
 
 np.random.seed(0)
 
@@ -14,6 +15,25 @@ class Activation_ReLU:
     def backward(self, dvalues):
         self.dinputs = dvalues.copy()
         self.dinputs[self.inputs <= 0] = 0
+
+class Activation_Tanh:
+    def forward(self, inputs):
+        """
+        Forward pass for the Tanh activation function.
+        Applies the Tanh function element-wise to the inputs.
+
+        Formula: output = tanh(inputs) = (e^x - e^(-x)) / (e^x + e^(-x))
+        """
+        self.inputs = inputs
+        self.output = np.tanh(inputs)  # Use NumPy's built-in Tanh
+
+    def backward(self, dvalues):
+        """
+        Backward pass for the Tanh activation function.
+        Derivative: 1 - output^2 (where output is Tanh's forward output)
+        """
+        self.dinputs = dvalues * (1 - self.output ** 2)
+
 
 class Activation_Sigmoid:
     def forward(self, inputs):
@@ -79,6 +99,19 @@ class Loss:
         data_loss = np.mean(sample_losses)
         return data_loss
 
+class Loss_MSE(Loss):
+    def forward(self, y_pred, y_true):
+        sample_losses = np.mean((y_true - y_pred)**2, axis=-1)
+        return sample_losses
+
+    def backward(self, dvalues, y_true):
+        samples = len(dvalues)
+        outputs = len(dvalues[0])
+        
+        self.dinputs = -2 * (y_true - dvalues) / outputs
+        self.dinputs = self.dinputs / samples
+
+
 class Loss_CategoricalCrossEntropy(Loss):
     def forward(self, y_pred, y_true):
         samples = len(y_pred)
@@ -129,7 +162,7 @@ class Optimizer_SGD:
         self.iterations += 1
 
 
-        
+
 def get_model_structure(num_neurons_of_layers):
     layers_info = []
     
@@ -142,33 +175,44 @@ def get_model_structure(num_neurons_of_layers):
     print("Layer connections:", layers_info)
     
     # Fixed hyperparameters
-    epochs = 1000
+    epochs = 100
     learning_rate = 0.001
     batch_size = 12
 
-    return layers_info, epochs, learning_rate, batch_size
+    return layers_info, batch_size
+
+
 
 # Build and train model based on user input
-def build_and_train_model(dataset , num_layers):
-    # Dataset
-    X, y = spiral_data(samples=100, classes=3)
+def build_and_train_model(dataset , num_layers , epochs , learning_rate):
 
+
+
+    # Dataset
+    X , y = select_dataset(dataset)
     # Get model structure from user
-    layers_info, epochs, learning_rate, batch_size = get_model_structure(num_layers)
+    layers_info, batch_size = get_model_structure(num_layers)
 
     # Initialize layers and activations
     layers = []
     activations = []
+
 
     for i, (n_inputs, n_neurons) in enumerate(layers_info):
         layers.append(Layer_Dense(n_inputs, n_neurons))
         if i < len(layers_info) - 1:
             activations.append(Activation_ReLU())  # Use ReLU for hidden layers
         else:
-            activations.append(Activation_Softmax())  # Softmax for the output layer
+            if dataset in ["spiral"]:
+                activations.append(Activation_Softmax())  # Softmax for the output layer
+            else:
+                activations.append(Activation_Tanh())
 
     # Loss and optimizer
-    loss_function = Loss_CategoricalCrossEntropy()
+    if dataset in ["spiral"]:
+        loss_function = Loss_CategoricalCrossEntropy()
+    else:
+        loss_function = Loss_MSE()
     optimizer = Optimizer_SGD(learning_rate=learning_rate, decay=1e-3)
 
     # Training loop
@@ -189,7 +233,7 @@ def build_and_train_model(dataset , num_layers):
             loss = loss_function.calculate(activations[-1].output, y_batch)
         # Print loss every 10 epochs
         if epoch % 10 == 0:
-            print(f"Epoch {epoch}, loss: {loss}")
+            print(f"Epoch {epoch}, loss: {loss} ")
 
             # Backward pass
             loss_function.backward(activations[-1].output, y_batch)
@@ -205,7 +249,17 @@ def build_and_train_model(dataset , num_layers):
             for layer in layers:
                 optimizer.update_params(layer)
             optimizer.post_update_params()
+        
+    metric_name = 'CategoricalCrossEntropy' if dataset in ["spiral"] else 'MSE'
+    
+    print(f"\nTraining completed!")
+    # print(f"Final loss: {epoch_loss:.4f}")
+    print(f"Final {metric_name}: {loss}")
 
-    return loss
+        
+
+
+    return metric_name ,loss
+
 
 

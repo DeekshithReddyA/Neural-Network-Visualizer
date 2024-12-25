@@ -5,7 +5,8 @@ function LossHistory({lossResponse}) {
     const [lossHistory , setLossHistory] = useState([]);
     useEffect(() =>{
         if (lossResponse) {
-          setLossHistory(prevResp=>[...prevResp,lossResponse]);
+          setLossHistory(prevResp=>[...prevResp,
+            lossResponse]);
         }
     },[lossResponse])
 
@@ -18,9 +19,9 @@ function LossHistory({lossResponse}) {
   
         <div className="mt-6 gap-4 max-h-[205px] overflow-y-auto">
           {/* This div will make the loss history scrollable when the content exceeds the height */}
-          {lossHistory.map((loss, ind) => (
+          {lossHistory.map((obj, ind) => (
             <p key={ind} className="text-gray-600">
-              Loss {ind + 1}: {loss}
+              {obj.metric_name} {obj.loss == '' ? '' : `${ind - 1}:` } {obj.loss}
             </p>
           ))}
         </div>
