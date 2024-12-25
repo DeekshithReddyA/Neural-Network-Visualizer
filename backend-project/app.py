@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS 
 from training import build_and_train_model
+from waitress import serve
 
 app = Flask(__name__)
 CORS(app)
@@ -48,5 +49,7 @@ def train():
     }
     return jsonify(response)
 
+
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    serve(app, host='0.0.0.0', port=4000)
