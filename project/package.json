@@ -13,6 +13,7 @@
     "@heroicons/react": "^2.2.0",
     "@material-tailwind/react": "^2.1.10",
     "@vercel/analytics": "^1.4.1",
+    "@vercel/speed-insights": "^1.1.0",
     "axios": "^1.7.9",
     "flowbite-react": "^0.10.2",
     "konva": "^9.3.16",
