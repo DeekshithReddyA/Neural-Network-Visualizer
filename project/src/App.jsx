@@ -45,8 +45,8 @@ function App() {
 
   return (
     <>
-    <Analytics />
     <SpeedInsights />
+    <Analytics />
     <header className="bg-indigo-600 text-white py-6 shadow-lg">
       <h1 className="text-3xl font-bold text-center">Neural Network Visualizer</h1>
     </header>
