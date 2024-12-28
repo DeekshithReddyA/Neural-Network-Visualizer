@@ -1,4 +1,5 @@
 project/node_modules/
 backend-project/node_modules/
 backend-project/__pycache__
+backend-project/__pycache__/*
 

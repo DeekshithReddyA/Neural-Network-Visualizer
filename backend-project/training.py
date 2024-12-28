@@ -2,6 +2,7 @@
 import numpy as np
 from nnfs.datasets import spiral_data
 from dataset import select_dataset
+import math
 
 np.random.seed(0)
 
@@ -247,7 +248,14 @@ def build_and_train_model(dataset , num_layers , epochs , learning_rate):
     print(f"\nTraining completed!")
     # print(f"Final loss: {epoch_loss:.4f}")
     print(f"Final {metric_name}: {loss}")
+<<<<<<< HEAD
     loss = round(loss , 3)
+=======
+    loss = math.sqrt(loss)
+    loss = round(loss,  3)
+    print(loss)
+
+>>>>>>> deeksBranch
         
 
 
