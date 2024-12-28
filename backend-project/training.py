@@ -242,7 +242,7 @@ def build_and_train_model(dataset , num_layers , epochs , learning_rate):
                 optimizer.update_params(layer)
             optimizer.post_update_params()
         
-    metric_name = 'CategoricalCrossEntropy' if dataset in ["spiral"] else 'MSE'
+    metric_name = 'CategoricalCrossEntropy' if dataset in ["spiral"] else 'RMSE'
     
     print(f"\nTraining completed!")
     # print(f"Final loss: {epoch_loss:.4f}")
