@@ -44,14 +44,6 @@ class Activation_Sigmoid:
         # Derivative of sigmoid: output * (1 - output)
         self.dinputs = dvalues * (self.output * (1 - self.output))
 
-class Activation_Tanh:
-    def forward(self, inputs):
-        self.inputs = inputs
-        self.output = np.tanh(inputs)  # Using NumPy's tanh implementation
-    
-    def backward(self, dvalues):
-        self.dinputs = dvalues * (1 - self.output ** 2)
-
     
 
 class Activation_Softmax:
@@ -255,6 +247,7 @@ def build_and_train_model(dataset , num_layers , epochs , learning_rate):
     print(f"\nTraining completed!")
     # print(f"Final loss: {epoch_loss:.4f}")
     print(f"Final {metric_name}: {loss}")
+    loss = round(loss , 3)
 
         
 
