@@ -2,6 +2,7 @@
 import numpy as np
 from nnfs.datasets import spiral_data
 from dataset import select_dataset
+import math
 
 np.random.seed(0)
 
@@ -250,11 +251,14 @@ def build_and_train_model(dataset , num_layers , epochs , learning_rate):
                 optimizer.update_params(layer)
             optimizer.post_update_params()
         
-    metric_name = 'CategoricalCrossEntropy' if dataset in ["spiral"] else 'MSE'
+    metric_name = 'CategoricalCrossEntropy' if dataset in ["spiral"] else 'RMSE'
     
     print(f"\nTraining completed!")
     # print(f"Final loss: {epoch_loss:.4f}")
     print(f"Final {metric_name}: {loss}")
+    loss = math.sqrt(loss)
+    loss = round(loss,  3)
+    print(loss)
 
         
 
