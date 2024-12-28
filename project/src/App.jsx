@@ -38,7 +38,7 @@ function App() {
       epochsLr,
     };
     setData(updatedData);
-    const response = await axios.post('http://localhost:4000/train', updatedData);
+    const response = await axios.post('https://neural-network-visualizer.onrender.com/train', updatedData);
     setLossResponse({ metric_name: response.data.metric_name, loss: response.data.loss });
     console.log(response.data);
   };
