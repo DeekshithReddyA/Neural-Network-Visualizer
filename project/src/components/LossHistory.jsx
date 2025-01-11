@@ -32,16 +32,3 @@ function LossHistory({lossResponse}) {
 }
 
 export default LossHistory
-//  return (
-//     <div className='bg-white p-6 rounded-lg shadow-lg max-w-2xl'>
-//       <div className='flex items-center gap-2 mb-6'>
-//         <ChartLine className="w-6 h-6 text-indigo-600" />
-//         <h2 className="text-2xl font-bold text-gray-800">Loss History</h2>
-//       </div>
-//       <div className='mt-6 gap-4'>
-//       {lossHistory.map((loss,ind)=>(
-//         <p key={ind} className='text-gray-600'>Loss {ind+1}: {loss}</p>
-//         ))}
-//       </div>
-//     </div> 
-//   );

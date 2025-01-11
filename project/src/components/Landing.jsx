@@ -8,9 +8,12 @@ import LossHistory from './LossHistory';
 function Landing() {
   const [dataset, setDataset] = useState({ name: "spiral", inputLayer: 2, outputLayer: 3 });
   const [activation, setActivation] = useState({ activation: "Sigmoid" });
-  const [isDatasetSelected, setIsDatasetSelected] = useState(false);
   const [isActSelected, setIsActSelected] = useState(false);
-  const [layers, setLayers] = useState([]);
+  const [layers, setLayers] = useState([
+    { id: crypto.randomUUID(), neurons: 2 }, // Input layer
+    { id: crypto.randomUUID(), neurons: 4 }, // Hidden layer
+    { id: crypto.randomUUID(), neurons: 3 } // Output Layer
+  ]);
   const [networkConfig, setNetworkConfig] = useState({ layers });
   const [data, setData] = useState({ dataset, activation, layers });
   const [lossResponse, setLossResponse] = useState({ metric_name: '', loss: '' });
@@ -56,16 +59,14 @@ function Landing() {
         <DatasetForm
           onDatasetChange={setDataset}
           onLayerChange={setLayers}
-          isDatasetSelected={setIsDatasetSelected}
         />
 
-        {/* NetworkForm directly below DatasetForm without a gap */}
+        {/* NetworkForm directly below DatasetForm */}
         <NetworkForm
           layers={layers}
           onLayersChange={setLayers}
           onGenerateNetwork={handleGenerateNetwork}
           onDatasetChange={setDataset}
-          isDatasetSelected={isDatasetSelected}
           onEpochsLrChange={setEpochsLr}
           epochsLr={epochsLr}
           onTrainNetwork={handleTrainNetwork}

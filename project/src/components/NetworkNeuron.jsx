@@ -3,7 +3,7 @@ import { Circle , Text } from 'react-konva'
 
 function NetworkNeuron({neuron , NEURON_RADIUS , viewport , animationState }) {
   return (
-    <React.Fragment key={neuron.id}>
+    <>
         <Circle
             x={neuron.position.x}
             y={neuron.position.y}
@@ -30,7 +30,7 @@ function NetworkNeuron({neuron , NEURON_RADIUS , viewport , animationState }) {
             fontSize={12 / viewport.scale}
             fill="#4f46e5"
         />
-    </React.Fragment>
+    </>
   )
 }
 
