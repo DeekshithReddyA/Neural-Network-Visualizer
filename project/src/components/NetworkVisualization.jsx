@@ -5,7 +5,10 @@ import useMeasure from 'react-use-measure';
 import { generateRandomWeights, generateRandomValues } from '../utils/animations';
 import ZoomControls from './ZoomControls';
 import AnimationControls from './AnimationControls';
-
+import { useNetworkLayout } from '../hooks/useNetworkLayout';
+import { NetworkConnection } from './NetworkConnection';
+import NetworkNeuron from './NetworkNeuron';
+import { ConnectionTooltip } from './ConnectionToolTip';
 
 function NetworkVisualization({ config }) {
 
@@ -13,6 +16,8 @@ function NetworkVisualization({ config }) {
     const neuronRefs = useRef({});
     const connectionRefs = useRef({});
 
+    //For tooltip
+    const [tooltipData, setTooltipData] = useState(null);
 
 
     const [neurons, setNeurons] = useState([]);
@@ -23,6 +28,7 @@ function NetworkVisualization({ config }) {
     const stageRef = useRef(null);
     //For dragging
     const isDragginRef = useRef(false);
+    
 
     //For animations
     const [animationState, setAnimationState] = useState({
@@ -36,6 +42,7 @@ function NetworkVisualization({ config }) {
     const lastUpdateTimeRef = useRef(0);
 
     const NEURON_RADIUS = 15;
+
 
     // Memoize network dimension calculation
     const { maxNeuronsInLayer, networkDimensions } = useMemo(() => {
@@ -51,6 +58,7 @@ function NetworkVisualization({ config }) {
         };
     }, [config.layers, bounds.width, bounds.height]);
 
+    const { calculatePositions } = useNetworkLayout(config, networkDimensions, NEURON_RADIUS);
     //Reset animation when config changes
     useEffect(() => {
         setAnimationState({
@@ -62,46 +70,7 @@ function NetworkVisualization({ config }) {
         });
     }, [config]);
 
-    const calculatePositions = useCallback(() => {
-        const neurons = [];
-        const connections = [];
-        const layerSpacing = networkDimensions.width / (config.layers.length - 1 || 1);
 
-        config.layers.forEach((layer, layerIndex) => {
-            const layerHeight = layer.neurons * (NEURON_RADIUS * 3);
-            const startY = (networkDimensions.height - layerHeight) / 2;
-            const x = layerIndex * layerSpacing;
-
-            for (let i = 0; i < layer.neurons; i++) {
-                const neuronId = `${layerIndex}-${i}`;
-                const y = startY + i * (NEURON_RADIUS * 3);
-
-                neurons.push({
-                    id: neuronId,
-                    layerId: layer.id,
-                    position: { x, y },
-                    value: 0,
-                    gradient: 0,
-                    isActive: false
-                });
-
-                // Only create connections if this isn't the last layer
-                if (layerIndex < config.layers.length - 1) {
-                    const nextLayer = config.layers[layerIndex + 1];
-                    for (let j = 0; j < nextLayer.neurons; j++) {
-                        connections.push({
-                            id: `${neuronId}-to-${layerIndex + 1}-${j}`,
-                            from: neuronId,
-                            to: `${layerIndex + 1}-${j}`,
-                            weight: Math.random() * 2 - 1,
-                            isActive: false
-                        });
-                    }
-                }
-            }
-        });
-        return { neurons, connections };
-    }, [config.layers, networkDimensions]);
 
 
     useEffect(() => {
@@ -243,6 +212,7 @@ function NetworkVisualization({ config }) {
         const { neurons: newNeurons, connections: newConnections } = calculatePositions();
         setNeurons(generateRandomValues(newNeurons));
         setConnections(generateRandomWeights(newConnections));
+        setTooltipData(null);
     }, [calculatePositions]);
 
     const handleStepForward = useCallback(() => {
@@ -398,65 +368,87 @@ function NetworkVisualization({ config }) {
                         }
 
                         return (
-                            <Arrow
-                                key={conn.id}
-                                points={[
-                                    fromNeuron.position.x,
-                                    fromNeuron.position.y,
-                                    toNeuron.position.x,
-                                    toNeuron.position.y
-                                ]}
-                                ref={connectionRefs.current[conn.id]}
-                                // ... existing Arrow props
-                                stroke={conn.isActive
-                                    ? (animationState.currentPhase === 'forward' ? '#eab308' : '#ef4444')
-                                    : '#94a3b8'
-                                }
-                                listening={false}
-                                strokeWidth={1 + Math.abs(conn.weight)}
-                                opacity={conn.isActive ? 0.8 : 0.4}
-                                pointerLength={5}
-                                pointerWidth={5}
-                                tension={0.2}
-                                className="konva-arrow"
-                            />
+                            <NetworkConnection
+                                key={`${conn.from}-${conn.to}`}
+                                connection={conn}
+                                fromNeuron={fromNeuron}
+                                toNeuron={toNeuron}
+                                animationState={animationState} 
+                                onHover={setTooltipData}
+                                scale={viewport.scale}/>
+                            // <Arrow
+                            //     key={conn.id}
+                            //     points={[
+                            //         fromNeuron.position.x,
+                            //         fromNeuron.position.y,
+                            //         toNeuron.position.x,
+                            //         toNeuron.position.y
+                            //     ]}
+                            //     ref={connectionRefs.current[conn.id]}
+                            //     // ... existing Arrow props
+                                // stroke={conn.isActive
+                                //     ? (animationState.currentPhase === 'forward' ? '#eab308' : '#ef4444')
+                                //     : '#94a3b8'
+                            //     }
+                            //     listening={false}
+                            //     strokeWidth={1 + Math.abs(conn.weight)}
+                            //     opacity={conn.isActive ? 0.8 : 0.4}
+                            //     pointerLength={5}
+                            //     pointerWidth={5}
+                            //     tension={0.2}
+                            //     className="konva-arrow"
+                            // />
                         );
                     })}
 
                     {/* Render neurons */}
                     {neurons.map((neuron) => (
-                        <React.Fragment key={neuron.id}>
-                            <Circle
-                                x={neuron.position.x}
-                                y={neuron.position.y}
-                                radius={NEURON_RADIUS / viewport.scale}
-                                ref={neuronRefs.current[neuron.id]}
-                                // ... existing Circle props
-                                fill={neuron.isActive
-                                    ? (animationState.currentPhase === 'forward' ? '#fef08a' : '#fee2e2')
-                                    : '#6dbeed'
-                                }
-                                stroke={neuron.isActive ? '#4f46e5' : '#6b7280'}
-                                strokeWidth={2 / viewport.scale}
-                                shadowColor="black"
-                                shadowBlur={5}
-                                shadowOpacity={0.1}
-                                shadowEnabled
-                                className="konva-circle"
-                            />
-                            <Text
-                                x={neuron.position.x - NEURON_RADIUS / viewport.scale}
-                                y={neuron.position.y - 6 / viewport.scale}
-                                width={NEURON_RADIUS * 2 / viewport.scale}
-                                // text={neuron.value?.toFixed(2) || '0.00'}
-                                align="center"
-                                fontSize={12 / viewport.scale}
-                                fill="#4f46e5"
-                            />
-                        </React.Fragment>
+                        <NetworkNeuron
+                            key={neuron.id}
+                            neuron={neuron}
+                            NEURON_RADIUS={NEURON_RADIUS}
+                            viewport={viewport}
+                            animationState={animationState} />
+                        // <React.Fragment key={neuron.id}>
+                        //     <Circle
+                        //         x={neuron.position.x}
+                        //         y={neuron.position.y}
+                        //         radius={NEURON_RADIUS / viewport.scale}
+                        //         ref={neuronRefs.current[neuron.id]}
+                        //         // ... existing Circle props
+                        //         fill={neuron.isActive
+                        //             ? (animationState.currentPhase === 'forward' ? '#fef08a' : '#fee2e2')
+                        //             : '#6dbeed'
+                        //         }
+                        //         stroke={neuron.isActive ? '#4f46e5' : '#6b7280'}
+                        //         strokeWidth={2 / viewport.scale}
+                        //         shadowColor="black"
+                        //         shadowBlur={5}
+                        //         shadowOpacity={0.1}
+                        //         shadowEnabled
+                        //         className="konva-circle"
+                        //     />
+                        //     <Text
+                        //         x={neuron.position.x - NEURON_RADIUS / viewport.scale}
+                        //         y={neuron.position.y - 6 / viewport.scale}
+                        //         width={NEURON_RADIUS * 2 / viewport.scale}
+                        //         // text={neuron.value?.toFixed(2) || '0.00'}
+                        //         align="center"
+                        //         fontSize={12 / viewport.scale}
+                        //         fill="#4f46e5"
+                        //     />
+                        // </React.Fragment>
                     ))}
                 </Layer>
             </Stage>
+            {tooltipData && (
+                <ConnectionTooltip
+                    x={tooltipData.x}
+                    y={tooltipData.y}
+                    connection={tooltipData.connection}
+                    animationState={animationState}
+                />
+            )}
             <AnimationControls
                 state={animationState}
                 onPlay={handlePlay}
